@@ -1,0 +1,169 @@
+{
+  "name": "Google Map Scraper with Telegram & AI",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"]
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [-450, -100],
+      "name": "Telegram Trigger",
+      "credentials": {
+        "telegramApi": {
+          "id": "your_telegram_cred_id",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "Your request is in progress.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "position": [-250, -100],
+      "name": "Notify User Request Received",
+      "credentials": {
+        "telegramApi": {
+          "id": "your_telegram_cred_id",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are an advanced AI agent designed to classify Google Map search queries into predefined categories based on type and location.\n### Categories:\n- Restaurant\n- Hotel\n- Medical Facility\n- Ground\n- Super Store\n- Hospital\n- Others\n\nInput: '{{ $json.message.text }}'\nOutput JSON with { query, category, place }"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [-50, -100],
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.first().json.output;\nconst match = inputData.match(/```([\\s\\S]*?)```/);\nif (match) {\n  return JSON.parse(match[1].trim());\n} else {\n  return { error: 'No valid JSON found' };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "position": [150, -100],
+      "name": "Parse AI Output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/compass~crawler-google-places/runs?token=YOUR_APIFY_TOKEN",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"includeWebResults\": false, \"language\": \"en\", \"locationQuery\": \"{{ $json.place }}\", \"maxCrawledPlacesPerSearch\": 7, \"searchStringsArray\": [\"{{ $json.category }}\"] }"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [400, -100],
+      "name": "Start Apify Crawler"
+    },
+    {
+      "parameters": {
+        "operation": "wait",
+        "time": 60000
+      },
+      "type": "n8n-nodes-base.wait",
+      "position": [650, -100],
+      "name": "Wait for Apify"
+    },
+    {
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/compass~crawler-google-places/runs/last/dataset/items?token=YOUR_APIFY_TOKEN"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [900, -100],
+      "name": "Get Apify Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "name": "Name", "value": "={{ $json.title }}", "type": "string" },
+            { "name": "Address", "value": "={{ $json.address }}", "type": "string" },
+            { "name": "Rating", "value": "={{ $json.totalScore }}", "type": "string" },
+            { "name": "URL", "value": "={{ $json.url }}", "type": "string" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "position": [1150, -100],
+      "name": "Format Data"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": "YOUR_GOOGLE_SHEET_DOC_ID",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Address": "={{ $json.Address }}",
+            "Rating": "={{ $json.Rating }}",
+            "URL": "={{ $json.URL }}"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [1400, -100],
+      "name": "Write to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your_google_sheet_cred_id",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "Your search data has been stored successfully!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "position": [1650, -100],
+      "name": "Notify User Success",
+      "credentials": {
+        "telegramApi": {
+          "id": "your_telegram_cred_id",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [[{"node": "Notify User Request Received", "type": "main", "index": 0}]]
+    },
+    "Notify User Request Received": {
+      "main": [[{"node": "AI Agent", "type": "main", "index": 0}]]
+    },
+    "AI Agent": {
+      "main": [[{"node": "Parse AI Output", "type": "main", "index": 0}]]
+    },
+    "Parse AI Output": {
+      "main": [[{"node": "Start Apify Crawler", "type": "main", "index": 0}]]
+    },
+    "Start Apify Crawler": {
+      "main": [[{"node": "Wait for Apify", "type": "main", "index": 0}]]
+    },
+    "Wait for Apify": {
+      "main": [[{"node": "Get Apify Data", "type": "main", "index": 0}]]
+    },
+    "Get Apify Data": {
+      "main": [[{"node": "Format Data", "type": "main", "index": 0}]]
+    },
+    "Format Data": {
+      "main": [[{"node": "Write to Google Sheets", "type": "main", "index": 0}]]
+    },
+    "Write to Google Sheets": {
+      "main": [[{"node": "Notify User Success", "type": "main", "index": 0}]]
+    }
+  }
+}

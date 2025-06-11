@@ -1,0 +1,255 @@
+{
+  "name": "Nike Info Using Vector Database",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nI'm a Nike representative, How can I help you?",
+        "options": {
+          "showWelcomeScreen": true,
+          "title": "Nike's AI Agent Welcomes you...",
+          "customCss": ":root {\n  /* Base Colors */\n  --chat--color-primary: #e74266;\n  --chat--color-primary-shade-50: #db4061;\n  --chat--color-primary-shade-100: #cf3c5c;\n  --chat--color-secondary: #20b69e;\n  --chat--color-white: #ffffff;\n  --chat--color-light: #f2f4f8;\n  --chat--color-dark: #101330;\n\n  /* Typography */\n  --chat--font-family: 'Segoe UI', Roboto, sans-serif;\n\n  /* Layout */\n  --chat--spacing: 1rem;\n  --chat--border-radius: 0.75rem;\n  --chat--transition-duration: 0.2s;\n\n  /* Chat Window */\n  --chat--window--width: 420px;\n  --chat--window--height: 600px;\n  --chat--window--bottom: 2rem;\n  --chat--window--right: 2rem;\n  --chat--window--border-radius: 1rem;\n  --chat--window--border: 1px solid #e0e0e0;\n\n  /* Input Area */\n  --chat--textarea--height: 44px;\n  --chat--textarea--max-height: 120px;\n  --chat--input--font-size: 0.95rem;\n  --chat--input--padding: 0.5rem 0.75rem;\n  --chat--input--border-radius: 1.25rem;\n  --chat--input--background: #ffffff;\n  --chat--input--text-color: #101330;\n  --chat--input--border-active: 2px solid var(--chat--color-primary);\n\n  /* Message Style */\n  --chat--message--font-size: 1rem;\n  --chat--message--padding: 0.85rem;\n  --chat--message--border-radius: 1rem;\n  --chat--message--user--background: var(--chat--color-primary);\n  --chat--message--user--color: var(--chat--color-white);\n  --chat--message--bot--background: #ffffff;\n  --chat--message--bot--color: var(--chat--color-dark);\n  --chat--message--margin-bottom: 0.8rem;\n\n  /* Send Button */\n  --chat--input--send--button--background: var(--chat--color-primary);\n  --chat--input--send--button--color: var(--chat--color-white);\n  --chat--input--send--button--background-hover: var(--chat--color-primary-shade-50);\n  --chat--input--send--button--color-hover: var(--chat--color-white);\n\n  /* Files, Buttons, etc. */\n  --chat--files-spacing: 0.5rem;\n}\n\n/* Custom prompt alignment - centered and beautiful */\n.chat-input-wrapper {\n  display: flex !important;\n  justify-content: center !important;\n  align-items: center !important;\n  padding: 0.75rem 1.5rem !important;\n  background-color: #fff0f4; /* subtle warm background */\n  border-radius: 2rem !important;\n  box-shadow: 0 8px 24px rgba(231, 66, 102, 0.15);\n  max-width: 720px;\n  margin: 0 auto;\n}\n\n/* Input styling */\n.chat-input {\n  max-width: 70% !important;\n  width: 100%;\n  font-size: 1.1rem !important;\n  border-radius: 2.5rem !important; /* softer pill shape */\n  padding: 0.8rem 1.5rem !important;\n  background-color: #ffffff !important;\n  border: 2.5px solid var(--chat--color-primary) !important;\n  box-shadow:\n    0 4px 12px rgba(231, 66, 102, 0.12),\n    inset 0 1px 3px rgba(255, 255, 255, 0.9);\n  transition: border-color 0.25s ease, box-shadow 0.25s ease;\n  font-weight: 600;\n  color: var(--chat--color-dark);\n  font-family: var(--chat--font-family);\n}\n\n/* Focus state with bright highlight */\n.chat-input:focus {\n  outline: none !important;\n  border-color: var(--chat--color-primary-shade-100) !important;\n  box-shadow:\n    0 0 12px 3px rgba(231, 66, 102, 0.35),\n    inset 0 1px 5px rgba(255, 255, 255, 0.95);\n  background-color: #fff7fa !important;\n}\n\n/* Optional: Style for send button if used */\n.chat-input-send-button {\n  background-color: var(--chat--color-primary);\n  color: var(--chat--color-white);\n  border: none;\n  border-radius: 2rem;\n  padding: 0.7rem 1.5rem;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background-color 0.3s ease;\n  margin-left: 1rem;\n  box-shadow: 0 4px 12px rgba(231, 66, 102, 0.3);\n}\n\n.chat-input-send-button:hover {\n  background-color: var(--chat--color-primary-shade-50);\n}\n\n/* Messages styling (optional tweak) */\n.chat-message {\n  max-width: 60%;\n  font-size: var(--chat--message--font-size);\n  padding: var(--chat--message--padding);\n  border-radius: var(--chat--message--border-radius);\n  margin-bottom: var(--chat--message--margin-bottom);\n  line-height: 1.4;\n  word-wrap: break-word;\n}\n\n/* User message style */\n.chat-message.user {\n  background-color: var(--chat--message--user--background);\n  color: var(--chat--message--user--color);\n  align-self: flex-end;\n}\n\n/* Bot message style */\n.chat-message.bot {\n  background-color: var(--chat--message--bot--background);\n  color: var(--chat--message--bot--color);\n  align-self: flex-start;\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -500,
+        -20
+      ],
+      "id": "b591384a-cf29-485f-aad1-ae57246adcd0",
+      "name": "When chat message received",
+      "webhookId": "6ead291e-7009-4005-82b3-d92a6492149c"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        220
+      ],
+      "id": "1756ecfc-df08-4fe8-a074-e8452bd7e958",
+      "name": "Groq Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "database",
+        "toolDescription": "call this tool to get information about nike's earning to answer user's question",
+        "memoryKey": {
+          "__rl": true,
+          "value": "Nike",
+          "mode": "list",
+          "cachedResultName": "Nike"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [
+        540,
+        160
+      ],
+      "id": "0844322d-1793-44ee-a1a1-6eb2a4570fcd",
+      "name": "Simple Vector Store",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        700,
+        380
+      ],
+      "id": "f9c52413-a41b-483f-9923-a94c3a54733c",
+      "name": "Embeddings Cohere",
+      "credentials": {},
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -200,
+        200
+      ],
+      "id": "8281ec87-1221-4b1a-baf8-4bc372cdde65",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "database",
+        "toolDescription": "call this tool to get information about nike's earning to answer user's question",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "testing",
+          "mode": "list",
+          "cachedResultName": "testing"
+        },
+        "options": {
+          "pineconeNamespace": "Nike"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.2,
+      "position": [
+        -60,
+        260
+      ],
+      "id": "e214dd10-aa05-4e43-ab87-5573f9ddbd02",
+      "name": "Pinecone Vector Store",
+      "credentials": {}
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        440
+      ],
+      "id": "20e095df-834d-4e7c-a256-7b5b242327db",
+      "name": "Embeddings Cohere1",
+      "credentials": {}
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ],
+      "id": "08b8c51f-f01e-44bd-866e-5faef9cbff19",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        420,
+        260
+      ],
+      "id": "2ebd57f4-b322-48e9-92ca-1a58dc35cc74",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Agent Role:\nYou are a friendly and helpful Nike representative, tasked with answering any questions users may have about Nike's earnings. You have access to a vector database with all the relevant data on Nike's financial performance, including revenue, profits, and other earnings-related information. When a user asks a question, you should search this database to find the most accurate and up-to-date information and respond in a friendly, approachable tone. Be sure to add humor and use emojis to make the conversation fun and engaging! \n\n\nInstructions for Interaction Flow: \n \nUser Query: A user asks a question about Nike's earnings (e.g., \"How did Nike perform in the last quarter?\"). \nSearch Vector Database: You search the vector database for relevant earnings information. \nFriendly Response: Answer the user with the information you \nretrieved, ensuring your response is informative but also fun and light-hearted. Use jokes and emojis where appropriate to keep the conversation engaging. \n\nFriendly Tone Example:\n\nGreet the user: \"Hey there, thanks for asking! Let's check out how Nike's been doing.\" \nUse jokes: \"Looks like Nike's earnings running fast this quarter-just like our sneakers!\" \nAdd emojis for engagement: \"Nike earned $XX billion last quarter-pretty swoosh-tastic, right? \nSample Flow: \n\nUser: \"How did Nike do in Q2?\"\n\nAgent: \n\"Great question! Hold on while I sprint through our earnings \ninfo...\" \n[Agent searches vector database for relevant earnings information] \n\"Boom! Nike earned SXX billion in Q2, with profits soaring higher than a slam dunk! Swoosh! Anything else I can help with? \n\nAvailable Tools: \n\nVector Database: Use this to retrieve specific earnings information and financial performance data. \nRemember, your goal is to provide accurate data while keeping the user engaged with humor, emojis, and a conversational tone"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -280,
+        -20
+      ],
+      "id": "3f75c1b4-ae1c-4d89-833a-14cecfa85f91",
+      "name": "Nike Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Nike Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Nike Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Nike Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Nike Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Nike Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Nike Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

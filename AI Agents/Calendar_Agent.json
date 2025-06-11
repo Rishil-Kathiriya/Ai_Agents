@@ -1,0 +1,152 @@
+{
+  "name": "Calendar Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nHow are you bro!!!",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -460,
+        -40
+      ],
+      "id": "d0483004-0f81-4291-b9d9-829938ef2ebd",
+      "name": "When chat message received",
+      "webhookId": "8c5a1561-95c1-4025-a4e0-12d19069e394"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=current date and time : {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -40
+      ],
+      "id": "ed935537-2ca0-4421-b80d-5d497f698931",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemma2-9b-it",
+          "mode": "list",
+          "cachedResultName": "gemma2-9b-it"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -380,
+        180
+      ],
+      "id": "f72fdbda-51b9-4799-93ea-ea2da8fb8230",
+      "name": "OpenAI Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "rishil.the.analyst@gmail.com",
+          "mode": "list",
+          "cachedResultName": "rishil.the.analyst@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -220,
+        200
+      ],
+      "id": "38465859-e187-47c9-bc0f-9cf89b9f16ed",
+      "name": "Create Event",
+      "credentials": {}
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        60,
+        180
+      ],
+      "id": "2b5fa980-c33d-46dc-9b90-daecbb8b575f",
+      "name": "Simple Memory",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "yxvO1S7eZEDHxfP4"
+  },
+  "versionId": "e051aaeb-6680-4141-9ea4-b900fb76574f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c1ab3487be64ef223ad376f657f7d79a161984c3c0e933480e0fb10360afeb7"
+  },
+  "id": "SEG91VVROBcvPgaq",
+  "tags": []
+}

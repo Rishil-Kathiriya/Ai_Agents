@@ -1,0 +1,186 @@
+{
+  "name": "Customer Order Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -20
+      ],
+      "id": "72637563-8f97-4406-809e-cb3806365e62",
+      "name": "Google Sheets Trigger",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=you are in charge of client orders. Your job is to take incoming information regarding new orders and give a nice summary that will be emailed to the team. the email should be signed of from \"Customer Order Alert Team\". \n\nHere is the information on client orders.\nOrder ID: {{ $json.OrderID }}\nCustomer Name:{{ $json.CustomerName }}\nProduct:{{ $json.Product }}\nQuantity:{{ $json.Quantity }}\nPrice:{{ $json.Price }}\nOrder Date:{{ $json.OrderDate }}\nStatus:{{ $json.Status }}\n\nPlease output the following parameter:\nEmail Subject\nEmail Body \n[return body and subject in json format]",
+        "options": {
+          "systemMessage": "give output the Email Subject and Email Body in JSON format,[both are different]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        80
+      ],
+      "id": "793c0fbb-fc10-469c-9af9-eef8b058068a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "gemma2-9b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        300
+      ],
+      "id": "28ba224e-7003-4c47-ba32-b314c63effe6",
+      "name": "Groq Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "sendTo": "",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        100
+      ],
+      "id": "525d25f8-d50c-4dd5-b21d-0d4e1618e886",
+      "name": "Gmail",
+      "webhookId": "",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw = $json.output.trim();\n\nfunction markdownToHtml(md) {\n  if (!md) return \"\";\n  // Convert **bold** markdown to <strong>\n  let html = md.replace(/\\*\\*(.+?)\\*\\*/g, \"<strong>$1</strong>\");\n  // Convert new lines to <br>\n  html = html.replace(/\\n/g, \"<br>\");\n  return html;\n}\n\ntry {\n  // Extract JSON inside markdown block if exists\n  const match = raw.match(/```json\\s*([\\s\\S]*?)```/);\n  const jsonStr = match ? match[1].trim() : raw;\n\n  // Parse JSON string\n  let parsed = JSON.parse(jsonStr);\n\n  // Sometimes JSON is double-encoded as a string\n  if (typeof parsed === \"string\") {\n    parsed = JSON.parse(parsed);\n  }\n\n  return {\n    subject: parsed[\"Email Subject\"] || \"\",\n    body: markdownToHtml(parsed[\"Email Body\"] || \"\"),\n  };\n} catch (error) {\n  return {\n    error: \"Invalid JSON format\",\n  };\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        80
+      ],
+      "id": "26a39373-e880-46fc-bbd4-2c8da46f5c57",
+      "name": "Code"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "id": "2384e42c-8491-42bd-aa7e-db0d35302c7f",
+      "name": "Calculator"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "28871876-184e-4d81-aac2-54ab06557c15",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c1ab3487be64ef223ad376f657f7d79a161984c3c0e933480e0fb10360afeb7"
+  },
+  "id": "pgEhxF0fX4kCDKtY",
+  "tags": []
+}
