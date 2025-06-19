@@ -1,0 +1,425 @@
+{
+  "name": "Video Creation",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Generate an Product Video",
+        "formDescription": "give us Product title, image, description and we will give you a professional marketing material.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Product Image",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product Title",
+              "placeholder": "e.g. Mobile",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product Description",
+              "placeholder": "e.g. Mobile with 8 GB RAM etc.",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Email",
+              "fieldType": "email",
+              "placeholder": "name@example.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [-620, -60],
+      "name": "On form submission"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Product : {{ $('On form submission').item.json['Product Title'] }}\nDescription :  {{ $('On form submission').item.json['Product Description'] }}",
+        "options": {
+          "systemMessage": "=#Overview\nYou are a world-class marketing strategist and expert text-to-image prompt engineer ..."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [-180, -60],
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [-160, 160],
+      "name": "Groq Chat Model"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawInput =  $input.first().json.output || '';\n\nfunction extractPrompt(text) {\n  const match = text.match(/\\\"([^\\\"]+)\\\"/);\n  return match ? match[1].replace(/\\s+/g, ' ').trim() : '';\n}\n\nreturn [\n  {\n    json: {\n      prompt: extractPrompt(rawInput)\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [180, -60],
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const imageId = $node[\"Google Drive Image\"].json.id;\nconst audioId = $node[\"Google Drive Audio\"].json.id;\n\nreturn [\n  {\n    json: {\n      timeline: {\n        tracks: [\n          {\n            clips: [\n              {\n                asset: {\n                  type: \"image\",\n                  src: `https://drive.google.com/uc?export=download&id=${imageId}`\n                },\n                start: 0,\n                length: 10,\n                fit: \"cover\"\n              },\n              {\n                asset: {\n                  type: \"audio\",\n                  src: `https://drive.google.com/uc?export=download&id=${audioId}`\n                },\n                start: 0,\n                length: 10\n              }\n            ]\n          }\n        ]\n      },\n      output: {\n        format: \"mp4\",\n        resolution: \"hd\"\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1090, -60],
+      "name": "Build Video JSON"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Product_Image",
+        "name": "={{ $json['Product Title'] }}Original",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ok_usXLGHsEHwXiEklo6fQipJg4T6IhX",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [-400, -60],
+      "name": "Google Drive Image"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "audio",
+        "name": "={{ $('On form submission').item.json['Product Title'] }}audio",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ok_usXLGHsEHwXiEklo6fQipJg4T6IhX",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [720, -60],
+      "name": "Google Drive Audio"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/REDACTED",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "REDACTED"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={\n  \"text\": \"{{ $json.prompt }}\" ,\n  \"model_id\": \"eleven_monolingual_v1\",\n  \"voice_settings\": {\n    \"stability\": 0.5,\n    \"similarity_boost\": 0.5\n  }\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "audio"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, -60],
+      "name": "Audio Generation"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.shotstack.io/edit/stage/render",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "REDACTED"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1360, -60],
+      "name": "Video Creation"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.shotstack.io/stage/render/{{ $json[\"response\"][\"id\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "REDACTED"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1660, -60],
+      "name": "Check Video created or not and pull the video"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.response.status }}",
+              "rightValue": "done",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1880, -60],
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Your Email'] }}",
+        "subject": "Your Video is ready. check it out!",
+        "emailType": "text",
+        "message": "=your uploaded image : https://drive.google.com/uc?export=download&id=EXAMPLE_IMAGE_ID\n\n\ncheck out your Video : {{ $json.response.url }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2100, -160],
+      "name": "Gmail"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2320, -160],
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [2100, 40],
+      "name": "Wait"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Google Drive Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Image": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Audio Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio Generation": {
+      "main": [
+        [
+          {
+            "node": "Google Drive Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Audio": {
+      "main": [
+        [
+          {
+            "node": "Build Video JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Video JSON": {
+      "main": [
+        [
+          {
+            "node": "Video Creation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Creation": {
+      "main": [
+        [
+          {
+            "node": "Check Video created or not and pull the video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Video created or not and pull the video": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Check Video created or not and pull the video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
