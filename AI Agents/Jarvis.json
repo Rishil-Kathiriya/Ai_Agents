@@ -1,0 +1,351 @@
+{
+  "name": "Jarvis",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -460,
+        -100
+      ],
+      "name": "When chat message received",
+      "webhookId": ""
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        120
+      ],
+      "name": "Groq Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -280,
+        100
+      ],
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        180,
+        -100
+      ],
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        100
+      ],
+      "name": "OpenAI Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for any calendar action. ",
+        "workflowId": {
+          "__rl": true,
+          "value": "iyzMxPh1qUgxfLrd",
+          "mode": "list",
+          "cachedResultName": "Calendar Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -200,
+        340
+      ],
+      "name": "Calendar Agent"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for any Tavily web Search action. ",
+        "workflowId": {
+          "__rl": true,
+          "value": "pYKDtkprRHTSeJQa",
+          "mode": "list",
+          "cachedResultName": "Tavily Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        100,
+        340
+      ],
+      "name": "Tavily Agent"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for any Content creation action. ",
+        "workflowId": {
+          "__rl": true,
+          "value": "BFFQfvH4ZoPnHdpg",
+          "mode": "list",
+          "cachedResultName": "Content Creation"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -60,
+        340
+      ],
+      "name": "Content Creation"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        260,
+        340
+      ],
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Overview\nYou are the ultimate personal assistant. Your job is to send the user's query to the correct tool. You should never be writing emails, or creating even summaries, you just need to call the correct tool.\n\n## Tools\nemailAgent: Use this tool to take action in email\ncalendarAgent: Use this tool to take action in calendar\ncontentCreator: Use this tool to create blog posts\nTavily Agent: Use this tool to search the web\nCrypto Analysis : Use this tool for any Crypto Analysis and stocks Analysis \n\n## Rules\nSome actions require you to look up contact information first. For the following actions, you must get contact information and send that to the agent who needs it:\nsending emails\ndrafting emails\ncreating calendar event with attendee\n\n## Examples\n1)\nInput: send an email to nate herkelman asking him what time he wants to leave\nAction: Use contactAgent to get nate herkelman's email\nAction: Use emailAgent to send the email. You will pass the tool a query like \"send nate herkelman an email to ask what time he wants to leave. here is\nhis email: [email address]\n- Output: The email has been sent to Nate Herkelman. Anything else I can help you with?\n\n2)\nInput: search for mangoes on the web.\nAction: Use Tavily to search the information\n- Output: Only the search term \"mangoes\"\n- Output: the info which you get from thw Tavily .Anything else I can help you with?\n\n3)\nInput: Analyze Bitcoin on Binance.\nAction: Use Crypto Analysis to analyze the Crypto\n- Output: Your Bitcoin Analysis on Binance are Sends to your telegram please check that out.Anything else I can help you with?\n\n## Final Reminders\nHere is the current date/time: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        -100
+      ],
+      "name": "Jarvis"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for any Email related action. ",
+        "workflowId": {
+          "__rl": true,
+          "value": "AGhnjT1dFDxTJfAH",
+          "mode": "list",
+          "cachedResultName": "Email Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        340
+      ],
+      "name": "EmailAgent"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool for any Crypto Analysis and stocks Analysis action. ",
+        "workflowId": {
+          "__rl": true,
+          "value": "ActxcNfnZMclFQiU",
+          "mode": "list",
+          "cachedResultName": "Crypto & Stocks Chart Analysis copy"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        580,
+        340
+      ],
+      "name": "Crypto Analysis"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Creation": {
+      "ai_tool": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jarvis": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EmailAgent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crypto Analysis": {
+      "ai_tool": [
+        [
+          {
+            "node": "Jarvis",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
