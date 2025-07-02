@@ -1,0 +1,230 @@
+{
+  "name": "Browser Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Browser Agent. How can I assist you today?",
+        "options": {
+          "loadPreviousSession": "memory",
+          "customCss": "=:root { ... }" 
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [-1300, -140],
+      "id": "7743aa04-42ba-4b61-9e30-180fb17e1f20",
+      "name": "When chat message received",
+      "webhookId": "[REDACTED]"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=# Overview\nYou are a smart, advanced web agent..."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [-760, -140],
+      "id": "3e6d7702-5569-48fb-b3c2-3338274b186e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "description": "start a new browser session and window",
+        "workflowId": {
+          "__rl": true,
+          "value": "[REDACTED]",
+          "mode": "list",
+          "cachedResultName": "Start Browser Tool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "https://www.naukri.com",
+            "profile_name": "Rocky"
+          },
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "type": "string"
+            },
+            {
+              "id": "profile_name",
+              "displayName": "profile_name",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [-840, 240],
+      "id": "880741ff-0d03-4b2f-8d74-16e78335c0c1",
+      "name": "Start Browser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [-1080, 80],
+      "id": "0cf00f38-7b89-4986-abbb-d12903e64854",
+      "name": "AI",
+      "credentials": {
+        "openAiApi": {
+          "id": "[REDACTED]",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [-960, 80],
+      "id": "867a1888-3d30-4d59-9cbb-c28662afcedd",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "resource": "interaction",
+        "operation": "type",
+        "sessionId": "={{ $fromAI('Session_ID', '', 'string') }}",
+        "windowId": "={{ $fromAI('Window_ID', '', 'string') }}",
+        "text": "={{ $fromAI('Text', '', 'string') }}",
+        "pressEnterKey": "={{ $fromAI('Press_Enter_Key', '', 'boolean') }}",
+        "elementDescription": "={{ $fromAI('Element_Description', '', 'string') }}"
+      },
+      "type": "n8n-nodes-base.airtopTool",
+      "typeVersion": 1,
+      "position": [-720, 240],
+      "id": "ac70aa98-495c-47e0-abd3-d7924d862b1f",
+      "name": "Type",
+      "credentials": {
+        "airtopApi": {
+          "id": "[REDACTED]",
+          "name": "Airtop Browser Agent"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "extraction",
+        "operation": "query",
+        "sessionId": "={{ $fromAI('Session_ID', '', 'string') }}",
+        "windowId": "={{ $fromAI('Window_ID', '', 'string') }}",
+        "prompt": "={{ $fromAI('Prompt', '', 'string') }}"
+      },
+      "type": "n8n-nodes-base.airtopTool",
+      "typeVersion": 1,
+      "position": [-600, 240],
+      "id": "2e8d8ef2-dbfd-4fb7-a1b7-640354989dfb",
+      "name": "Query",
+      "credentials": {
+        "airtopApi": {
+          "id": "[REDACTED]",
+          "name": "Airtop Browser Agent"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "terminate",
+        "sessionId": "={{ $fromAI('Session_ID', '', 'string') }}"
+      },
+      "type": "n8n-nodes-base.airtopTool",
+      "typeVersion": 1,
+      "position": [-460, 240],
+      "id": "b73d8121-aa8c-47f5-a4d0-ba848d631ff8",
+      "name": "End Session",
+      "credentials": {
+        "airtopApi": {
+          "id": "[REDACTED]",
+          "name": "Airtop Browser Agent"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [-320, 240],
+      "id": "45ed6387-da68-4546-abe0-34a89afd07c8",
+      "name": "Think"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [-1340, 80],
+      "id": "bab204ae-7f2d-49a4-9ed3-56c8982a1084",
+      "name": "Simple Memory1"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [{ "node": "AI Agent", "type": "main", "index": 0 }]
+      ]
+    },
+    "Start Browser": {
+      "ai_tool": [
+        [{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    },
+    "AI": {
+      "ai_languageModel": [
+        [{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [{ "node": "AI Agent", "type": "ai_memory", "index": 0 }]
+      ]
+    },
+    "Type": {
+      "ai_tool": [
+        [{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    },
+    "Query": {
+      "ai_tool": [
+        [{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    },
+    "End Session": {
+      "ai_tool": [
+        [{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [{ "node": "When chat message received", "type": "ai_memory", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "31e7c341-d1d8-428f-af98-68501c17295d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "[REDACTED]"
+  },
+  "id": "7UuuJicWadxIrePw",
+  "tags": []
+}

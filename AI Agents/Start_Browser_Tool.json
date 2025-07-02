@@ -1,0 +1,178 @@
+{
+  "name": "Start Browser Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "url"
+            },
+            {
+              "name": "profile_name"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        -40
+      ],
+      "id": "31950253-61bf-4022-b425-f70a68433c45",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "profileName": "={{ $json.profile_name }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtop",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -40
+      ],
+      "id": "eef6b2c7-b0ca-4f96-b18a-d11163de40ad",
+      "name": "Session",
+      "credentials": {
+        "airtopApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "resource": "window",
+        "url": "={{ $('When Executed by Another Workflow').item.json.url }}",
+        "getLiveView": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtop",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -40
+      ],
+      "id": "0c6e5777-c23d-4dd3-9107-518e810f82fc",
+      "name": "Window",
+      "credentials": {
+        "airtopApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "browser-agent"
+        },
+        "text": "={{ $json.data.liveViewUrl }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        -40
+      ],
+      "id": "a56be931-cde6-4923-b650-91d20015bc19",
+      "name": "Slack",
+      "webhookId": "",
+      "credentials": {
+        "slackOAuth2Api": {}
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "59b8ccbc-e563-4876-a063-3bed81e6bd7e",
+              "name": "sessionid",
+              "value": "={{ $('Session').item.json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "020537c9-0dd3-46bc-b1e5-edbf68b11d14",
+              "name": "windowid",
+              "value": "={{ $('Window').item.json.windowId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        380,
+        -40
+      ],
+      "id": "4291b093-4989-4a37-99cf-245b84577653",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Session": {
+      "main": [
+        [
+          {
+            "node": "Window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d470b61e-ea05-4aa3-9aeb-72783bff2164",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "id": "Kj8wkOCnviVBwP7a",
+  "tags": []
+}
