@@ -1,26 +1,20 @@
 🤖 AI Agents – Built with n8n
 Welcome to the AI Agents repository — a collection of 15+ intelligent agents built using n8n, a powerful, open-source workflow automation tool.
-
 These agents are designed to automate real-world tasks using AI and various integrations like OpenAI, Google APIs, email, calendar, and more. Each agent is saved as a .json file and can be directly imported into your n8n instance to explore, use, or customize.
+
 
 📁 What’s Inside
 ✅ 15+ AI-powered agents for productivity, automation, and smart analysis
-
 💾 Ready-to-use .json workflows for n8n
-
 ⚡ No-code/low-code structure — fast to build, easy to customize
+
 
 💡 Use Cases
 These agents help you:
-
 🤖 Act as a personal AI assistant (e.g., Jarvis)
-
 📬 Automate emails, meetings, and reminders
-
 📊 Analyze resumes, stock trends, and content sentiment
-
 🌐 Translate, summarize, or generate content with AI
-
 🧱 Build custom zero-code automations in minutes
 
 ⚙️ How to Use
@@ -38,18 +32,17 @@ Or use: n8n Cloud
 
 3. Import a Workflow
 Click the menu → Import Workflow
-
 Upload any .json file from the /agents folder
 
 4. Configure
 Add required API keys (OpenAI, Google, etc.)
-
 Adjust prompts, inputs, or logic as needed
 
 5. Run the Agent
 Click Execute Workflow
 
 💥 Watch your AI agent do its magic!
+
 
 ✅ Built AI Agents
 These agents are already developed and available in this repository:
@@ -71,6 +64,7 @@ Fetches real-time stock data, analyzes trends, and suggests insights.
 
 Content Generator
 Creates blogs, captions, and summaries using GPT-4 or Claude models.
+
 
 
 🧪 Planned & In-Progress Agents
