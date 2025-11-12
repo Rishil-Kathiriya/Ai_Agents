@@ -13,7 +13,6 @@ sections:
     content: |
       ✅ **15+ AI-powered agents** for productivity, automation, and smart analysis  
       💾 **Ready-to-use JSON files**  
-      ⚡ **No-code/low-code setup** — fast to use, easy to modify  
 
   - title: "💡 Use Cases"
     content: |
